@@ -26,7 +26,7 @@ dependencies {
 group = 'com.huaban'
 version = '1.0.1-SNAPSHOT'
 description = '结巴分词工具(jieba for java)'
-sourceCompatibility = '1.6'
+sourceCompatibility = '1.8'
 
 configurations.all {
 }
