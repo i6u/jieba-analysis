@@ -26,11 +26,9 @@ public class WordDictionary {
     private Double total = 0.0;
     private DictSegment _dict;
 
-
     private WordDictionary() {
         this.loadDict();
     }
-
 
     public static WordDictionary getInstance() {
         if (singleton == null) {
@@ -47,19 +45,21 @@ public class WordDictionary {
 
     /**
      * for ES to initialize the user dictionary.
-     * 
+     * You can call this method periodly for dynamic load new word
      * @param configFile
      */
     public void init(File configFile) {
         String path = configFile.getAbsolutePath();
         System.out.println("initialize user dictionary:" + path);
         synchronized (WordDictionary.class) {
-            if (loadedPath.contains(path))
-                return;
             for (File userDict : configFile.listFiles()) {
+                if (loadedPath.contains(userDict.getAbsolutePath())) {
+                    System.out.println("already loaded: " + userDict.getAbsolutePath());
+                    continue;
+                }
                 if (userDict.getPath().endsWith(USER_DICT_SUFFIX)) {
                     singleton.loadUserDict(userDict);
-                    loadedPath.add(path);
+                    loadedPath.add(userDict.getAbsolutePath());
                 }
             }
         }
@@ -92,17 +92,14 @@ public class WordDictionary {
                 minFreq = Math.min(entry.getValue(), minFreq);
             }
             System.out.println(String.format("main dict load finished, time elapsed %d ms",
-                System.currentTimeMillis() - s));
-        }
-        catch (IOException e) {
+                    System.currentTimeMillis() - s));
+        } catch (IOException e) {
             System.err.println(String.format("%s load failure!", MAIN_DICT));
-        }
-        finally {
+        } finally {
             try {
                 if (null != is)
                     is.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 System.err.println(String.format("%s close failure!", MAIN_DICT));
             }
         }
@@ -114,8 +111,7 @@ public class WordDictionary {
             String key = word.trim().toLowerCase();
             _dict.fillSegment(key.toCharArray());
             return key;
-        }
-        else
+        } else
             return null;
     }
 
@@ -129,8 +125,7 @@ public class WordDictionary {
         InputStream is;
         try {
             is = new FileInputStream(userDict);
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             System.err.println(String.format("could not find %s", userDict.getAbsolutePath()));
             return;
         }
@@ -153,17 +148,14 @@ public class WordDictionary {
                 count++;
             }
             System.out.println(String.format("user dict %s load finished, tot words:%d, time elapsed:%dms",
-                userDict.getAbsolutePath(), count, System.currentTimeMillis() - s));
-        }
-        catch (IOException e) {
+                    userDict.getAbsolutePath(), count, System.currentTimeMillis() - s));
+        } catch (IOException e) {
             System.err.println(String.format("%s: load user dict failure!", userDict.getAbsolutePath()));
-        }
-        finally {
+        } finally {
             try {
                 if (null != is)
                     is.close();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 System.err.println(String.format("%s close failure!", userDict.getAbsolutePath()));
             }
         }
